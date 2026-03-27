@@ -90,7 +90,6 @@
     <div class="card">
       <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('today')">今日投球</button>
-        <button class="tab-btn" onclick="switchTab('stats')">统计</button>
         <button class="tab-btn" onclick="switchTab('history')">历史</button>
         <button class="tab-btn" onclick="switchTab('correlation')">月相</button>
       </div>
@@ -111,7 +110,8 @@
         </div>
         <button class="submit-btn" id="submitBtn" onclick="submitMood()" disabled>投球！</button>
       </div>
-      <div id="statsTab" class="tab-content">
+
+      <div id="historyTab" class="tab-content">
         <h2>心情统计</h2>
         <div class="stats-grid" id="statsGrid">
           <div class="stat-item"><div class="stat-count" id="totalDays">0</div><div class="stat-label">总天数</div></div>
@@ -119,9 +119,7 @@
           <div class="stat-item"><div class="stat-count" id="longestStreak">0</div><div class="stat-label">最长</div></div>
           <div class="stat-item"><div class="stat-count" id="thisMonth">0</div><div class="stat-label">本月</div></div>
         </div>
-      </div>
-      <div id="historyTab" class="tab-content">
-        <h2>投球历史</h2>
+        <h2 style="margin-top:20px;">投球历史</h2>
         <div class="calendar-container">
           <div class="calendar-header">
             <h3 id="calendarTitle">2026 年 3 月</h3>
@@ -207,7 +205,7 @@ function loadHistory(){const records=getRecords();const list=document.getElement
 function prevMonth(){currentCalendarDate.setMonth(currentCalendarDate.getMonth()-1);renderCalendar()}
 function nextMonth(){currentCalendarDate.setMonth(currentCalendarDate.getMonth()+1);renderCalendar()}
 function loadCorrelation(){const records=getRecords();const chart=document.getElementById('correlationChart');const quoteContainer=document.getElementById('quoteContainer');const today=records.find(r=>r.date===getTodayString());if(today&&today.quote){quoteContainer.innerHTML=`<div class="quote-card"><div class="quote-text">"${today.quote.text}"</div><div class="quote-source">—— ${today.quote.source}</div></div>`}else{quoteContainer.innerHTML='<p style="text-align:center;color:#999;padding:15px;font-size:0.8rem;">投球后会显示今日心情名言</p>'}if(!records.length){chart.innerHTML='<p style="text-align:center;color:#999;padding:30px;font-size:0.8rem;">📝 开始记录后，这里会显示心情与月相的关联<br><br>至少需要 7 条记录哦～</p>';return}const stats={};MOON_PHASES.forEach(p=>{stats[p.name]={total:0,moods:{}};Object.keys(MOOD_COLORS).forEach(m=>stats[p.name].moods[m]=0)});records.forEach(r=>{if(stats[r.moonPhase]){stats[r.moonPhase].total++;if(stats[r.moonPhase].moods[r.mood]!==undefined)stats[r.moonPhase].moods[r.mood]++}});const icons={'新月':'🌑','蛾眉月':'🌒','上弦月':'🌓','盈凸月':'🌔','满月':'🌕','亏凸月':'🌖','下弦月':'🌗','残月':'🌘'};const hasData=Object.values(stats).some(s=>s.total>0);if(!hasData){chart.innerHTML='<p style="text-align:center;color:#999;padding:30px;font-size:0.8rem;">📊 数据收集中<br><br>继续记录，看看你的心情与月相有什么关联吧～</p>';return}chart.innerHTML=Object.entries(stats).filter(([_,d])=>d.total>0).map(([name,data])=>{const m=MOOD_COLORS[data.mood];const pct=Math.round((data.moods[data.mood]/data.total)*100);return`<div class="correlation-item"><div class="correlation-moon">${icons[name]}</div><div class="correlation-bar"><div class="correlation-fill" style="width:${Math.max(35,pct)}%">${pct}%</div></div><div class="correlation-label">${m.label}</div></div>`}).join('')}
-function switchTab(tab){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));document.getElementById(`${tab}Tab`).classList.add('active');if(tab==='stats')loadStats();else if(tab==='history'){loadHistory();renderCalendar()}else if(tab==='correlation')loadCorrelation()}
+function switchTab(tab){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));document.getElementById(`${tab}Tab`).classList.add('active');if(tab==='history'){loadStats();loadHistory();renderCalendar()}else if(tab==='correlation'){loadStats();loadCorrelation()}}
 function showMessage(text,type){const c=document.getElementById('messageContainer');c.innerHTML=`<div class="message ${type}">${text}</div>`;setTimeout(()=>c.innerHTML='',3000)}
 </script>
 </body>
