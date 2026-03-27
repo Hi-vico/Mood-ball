@@ -80,6 +80,11 @@
     .mood-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; justify-content: center; }
     .mood-legend-item { display: flex; align-items: center; gap: 4px; font-size: 0.65rem; }
     .mood-legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .day-detail { background: linear-gradient(135deg, #e8f4fd, #f0f7ff); border-left: 4px solid #667eea; padding: 15px; margin: 15px 0; border-radius: 0 8px 8px 0; }
+    .day-detail-text { font-size: 0.85rem; color: #333; font-weight: 500; margin-bottom: 5px; }
+    .day-detail-moon { font-size: 0.75rem; color: #666; }
+    .day-detail-empty { background: linear-gradient(135deg, #f8f9fa, #e9ecef); border-left: 4px solid #999; }
+    .day-detail-empty .day-detail-text { color: #666; font-style: italic; }
   </style>
 </head>
 <body>
@@ -121,6 +126,7 @@
           <div class="stat-item"><div class="stat-count" id="longestStreak">0</div><div class="stat-label">最长</div></div>
           <div class="stat-item"><div class="stat-count" id="thisMonth">0</div><div class="stat-label">本月</div></div>
         </div>
+        <div id="dayDetailContainer"></div>
         <h2 style="margin-top:20px;">投球历史</h2>
         <div class="calendar-container">
           <div class="calendar-header">
@@ -209,7 +215,7 @@ function nextMonth(){currentCalendarDate.setMonth(currentCalendarDate.getMonth()
 function loadCorrelation(){const records=getRecords();const chart=document.getElementById('correlationChart');const quoteContainer=document.getElementById('quoteContainer');const today=records.find(r=>r.date===getTodayString());console.log('today record:',today);if(today){if(today.quoteText&&today.quoteSource){quoteContainer.innerHTML=`<div class="quote-card"><div class="quote-text">"${today.quoteText}"</div><div class="quote-source">—— ${today.quoteSource}</div></div>`}else if(today.quote){quoteContainer.innerHTML=`<div class="quote-card"><div class="quote-text">"${today.quote.text}"</div><div class="quote-source">—— ${today.quote.source}</div></div>`}else{quoteContainer.innerHTML='<p style="text-align:center;color:#999;padding:15px;font-size:0.8rem;">💫 今天已投球，但名言数据丢失，请重新投球</p>'}}else{quoteContainer.innerHTML='<p style="text-align:center;color:#999;padding:15px;font-size:0.8rem;">📝 完成今日投球，解锁专属心情名言</p>'}if(!records.length){chart.innerHTML='<p style="text-align:center;color:#999;padding:30px;font-size:0.8rem;">📊 开始记录后<br>这里会显示心情与月相的关联</p>';return}const stats={};MOON_PHASES.forEach(p=>{stats[p.name]={total:0,moods:{}};Object.keys(MOOD_COLORS).forEach(m=>stats[p.name].moods[m]=0)});records.forEach(r=>{if(stats[r.moonPhase]){stats[r.moonPhase].total++;if(stats[r.moonPhase].moods[r.mood]!==undefined)stats[r.moonPhase].moods[r.mood]++}});const icons={'新月':'🌑','蛾眉月':'🌒','上弦月':'🌓','盈凸月':'🌔','满月':'🌕','亏凸月':'🌖','下弦月':'🌗','残月':'🌘'};const hasData=Object.values(stats).some(s=>s.total>0);if(!hasData){chart.innerHTML='<p style="text-align:center;color:#999;padding:30px;font-size:0.8rem;">📊 数据收集中<br>继续记录，看看心情与月相的关联</p>';return}chart.innerHTML=Object.entries(stats).filter(([_,d])=>d.total>0).map(([name,data])=>{const m=MOOD_COLORS[data.mood];const pct=Math.round((data.moods[data.mood]/data.total)*100);return`<div class="correlation-item"><div class="correlation-moon">${icons[name]}</div><div class="correlation-bar"><div class="correlation-fill" style="width:${Math.max(35,pct)}%">${pct}%</div></div><div class="correlation-label">${m.label}</div></div>`}).join('')}
 function switchTab(tab){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));document.getElementById(`${tab}Tab`).classList.add('active');if(tab==='history'){loadStats();loadHistory();renderCalendar()}else if(tab==='correlation'){loadStats();loadCorrelation()}}
 function showMessage(text,type){const c=document.getElementById('messageContainer');c.innerHTML=`<div class="message ${type}">${text}</div>`;setTimeout(()=>c.innerHTML='',3000)}
-function showDayDetail(dateStr){const records=getRecords();const record=records.find(r=>r.date===dateStr);if(record){const m=MOOD_COLORS[record.mood];const moon=calculateMoonPhase(new Date(dateStr));showMessage(`${dateStr} - ${record.moodLabel} ${moon.icon}${record.moonPhase}`,'info')}else{showMessage(`${dateStr} - 当天没有投球记录`,'info')}}
+function showDayDetail(dateStr){const records=getRecords();const record=records.find(r=>r.date===dateStr);const container=document.getElementById('dayDetailContainer');if(record){const moon=calculateMoonPhase(new Date(dateStr));container.innerHTML=`<div class="day-detail"><div class="day-detail-text"><strong>${dateStr}</strong> - ${record.moodLabel}</div><div class="day-detail-moon">${moon.icon} ${moon.name}${record.quoteText?' · "'+record.quoteText+'"':''}</div></div>`}else{container.innerHTML=`<div class="day-detail day-detail-empty"><div class="day-detail-text">${dateStr} - 当天没有投球记录 🌙</div></div>`}}
 </script>
 </body>
 </html>
