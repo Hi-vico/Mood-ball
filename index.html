@@ -107,7 +107,7 @@
           <div class="mood-ball blue" onclick="selectMood('blue', '忧郁')"><span>🔵</span><span>忧郁</span></div>
           <div class="mood-ball green" onclick="selectMood('green', '平和')"><span>🟢</span><span>平和</span></div>
           <div class="mood-ball purple" onclick="selectMood('purple', '焦虑')"><span>🟣</span><span>焦虑</span></div>
-          <div class="mood-ball orange" onclick="selectMood('orange', '活力')"><span>🟠</span><span>活力</span></div>
+          <div class="mood-ball orange" onclick="selectMood('orange', '难过')"><span>🟠</span><span>难过</span></div>
         </div>
         <button class="submit-btn" id="submitBtn" onclick="submitMood()" disabled>投球！</button>
       </div>
@@ -144,7 +144,7 @@
   </div>
 <script>
 const MOON_PHASES=[{name:'新月',icon:'🌑'},{name:'蛾眉月',icon:'🌒'},{name:'上弦月',icon:'🌓'},{name:'盈凸月',icon:'🌔'},{name:'满月',icon:'🌕'},{name:'亏凸月',icon:'🌖'},{name:'下弦月',icon:'🌗'},{name:'残月',icon:'🌘'}];
-const MOOD_COLORS={red:{label:'兴奋',class:'red',from:'#ff6b6b',to:'#ee5a5a'},yellow:{label:'开心',class:'yellow',from:'#ffd93d',to:'#f9c846'},blue:{label:'忧郁',class:'blue',from:'#6b9eff',to:'#5a8bee'},green:{label:'平和',class:'green',from:'#6bce6b',to:'#5abf5a'},purple:{label:'焦虑',class:'purple',from:'#a78bfa',to:'#9377f0'},orange:{label:'活力',class:'orange',from:'#ff9f43',to:'#ff8e2e'}};
+const MOOD_COLORS={red:{label:'兴奋',class:'red',from:'#ff6b6b',to:'#ee5a5a'},yellow:{label:'开心',class:'yellow',from:'#ffd93d',to:'#f9c846'},blue:{label:'忧郁',class:'blue',from:'#6b9eff',to:'#5a8bee'},green:{label:'平和',class:'green',from:'#6bce6b',to:'#5abf5a'},purple:{label:'焦虑',class:'purple',from:'#a78bfa',to:'#9377f0'},orange:{label:'难过',class:'orange',from:'#ff9f43',to:'#ff8e2e'}};
 const MOOD_QUOTES={
   red:[
     {text:'生命就像一盒巧克力，你永远不知道下一块是什么味道',source:'《阿甘正传》'},
@@ -182,11 +182,11 @@ const MOOD_QUOTES={
     {text:'焦虑是自由的眩晕',source:'《存在与时间》'}
   ],
   orange:[
-    {text:'我要打十个！',source:'《叶问》'},
-    {text:'做人如果没有梦想，跟咸鱼有什么分别',source:'《少林足球》'},
-    {text:'我命由我不由天，是魔是仙，我自己说了算',source:'《哪吒之魔童降世》'},
-    {text:'让子弹飞一会儿',source:'《让子弹飞》'},
-    {text:'年轻就是资本',source:'《致青春》'}
+    {text:'原来那个女孩子在我心里面流下了一滴眼泪',source:'《大话西游》'},
+    {text:'有些故事还没讲完，那就算了吧',source:'《那些花儿》'},
+    {text:'人生若只如初见，何事秋风悲画扇',source:'《木兰花令》'},
+    {text:'错过并不是过错，爱过就值得',source:'《后来的我们》'},
+    {text:'成长就是一种失去',source:'《阳光灿烂的日子》'}
   ]
 };
 let selectedMood=null;let selectedMoodLabel=null;let currentCalendarDate=new Date();let usedQuotes={};
