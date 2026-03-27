@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>心情投球 🎱</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh; padding: 20px; color: #333;
+    }
+    .container { max-width: 600px; margin: 0 auto; }
+    header { text-align: center; color: white; margin-bottom: 30px; }
+    header h1 { font-size: 2.5rem; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+    header p { font-size: 1.1rem; opacity: 0.9; }
+    .card { background: white; border-radius: 20px; padding: 30px; margin-bottom: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+    .card h2 { margin-bottom: 20px; color: #667eea; font-size: 1.5rem; }
+    .mood-selection { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .mood-ball { aspect-ratio: 1; border-radius: 50%; border: 4px solid transparent; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.9rem; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); font-weight: bold; }
+    .mood-ball:hover { transform: scale(1.1); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+    .mood-ball.selected { border-color: #333; transform: scale(1.15); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+    .mood-ball.red { background: linear-gradient(135deg, #ff6b6b, #ee5a5a); }
+    .mood-ball.yellow { background: linear-gradient(135deg, #ffd93d, #f9c846); color: #333; text-shadow: none; }
+    .mood-ball.blue { background: linear-gradient(135deg, #6b9eff, #5a8bee); }
+    .mood-ball.green { background: linear-gradient(135deg, #6bce6b, #5abf5a); }
+    .mood-ball.purple { background: linear-gradient(135deg, #a78bfa, #9377f0); }
+    .mood-ball.orange { background: linear-gradient(135deg, #ff9f43, #ff8e2e); }
+    .moon-phase { text-align: center; padding: 20px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 15px; color: white; margin-bottom: 20px; }
+    .moon-icon { font-size: 3rem; margin-bottom: 10px; }
+    .moon-name { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
+    .moon-date { opacity: 0.8; font-size: 0.9rem; }
+    .submit-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 10px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: all 0.3s ease; }
+    .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
+    .submit-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 10px; margin-bottom: 20px; }
+    .stat-item { text-align: center; padding: 15px 10px; background: #f8f9fa; border-radius: 10px; }
+    .stat-count { font-size: 1.8rem; font-weight: bold; color: #667eea; }
+    .stat-label { font-size: 0.8rem; color: #666; margin-top: 5px; }
+    .history-list { max-height: 300px; overflow-y: auto; }
+    .history-item { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #eee; gap: 15px; }
+    .history-item:last-child { border-bottom: none; }
+    .history-ball { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; }
+    .history-info { flex: 1; }
+    .history-date { font-weight: bold; margin-bottom: 3px; }
+    .history-moon { font-size: 0.85rem; color: #666; }
+    .message { padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-weight: bold; }
+    .message.success { background: #d4edda; color: #155724; }
+    .message.error { background: #f8d7da; color: #721c24; }
+    .message.info { background: #d1ecf1; color: #0c5460; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+    .tab-btn { flex: 1; padding: 12px; background: #f0f0f0; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; }
+    .tab-btn.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .correlation-chart { margin-top: 20px; }
+    .correlation-item { display: flex; align-items: center; margin-bottom: 15px; gap: 15px; }
+    .correlation-moon { width: 50px; text-align: center; font-size: 1.5rem; }
+    .correlation-bar { flex: 1; height: 30px; background: #f0f0f0; border-radius: 15px; overflow: hidden; position: relative; }
+    .correlation-fill { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 15px; transition: width 0.5s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-weight: bold; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎱 心情投球</h1>
+      <p>每天一次，记录你的心情与月相</p>
+    </header>
+    <div id="messageContainer"></div>
+    <div class="card">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('today')">今日投球</button>
+        <button class="tab-btn" onclick="switchTab('stats')">统计分析</button>
+        <button class="tab-btn" onclick="switchTab('history')">历史记录</button>
+        <button class="tab-btn" onclick="switchTab('correlation')">月相关联</button>
+      </div>
+      <div id="todayTab" class="tab-content active">
+        <div class="moon-phase" id="moonPhase"><div class="moon-icon">🌙</div><div class="moon-name">加载中...</div><div class="moon-date" id="currentDate"></div></div>
+        <h2>选择今天的心情</h2>
+        <div class="mood-selection">
+          <div class="mood-ball red" onclick="selectMood('red', '兴奋')" data-mood="red"><span>🔴</span><span>兴奋</span></div>
+          <div class="mood-ball yellow" onclick="selectMood('yellow', '开心')" data-mood="yellow"><span>🟡</span><span>开心</span></div>
+          <div class="mood-ball blue" onclick="selectMood('blue', '忧郁')" data-mood="blue"><span>🔵</span><span>忧郁</span></div>
+          <div class="mood-ball green" onclick="selectMood('green', '平和')" data-mood="green"><span>🟢</span><span>平和</span></div>
+          <div class="mood-ball purple" onclick="selectMood('purple', '焦虑')" data-mood="purple"><span>🟣</span><span>焦虑</span></div>
+          <div class="mood-ball orange" onclick="selectMood('orange', '活力')" data-mood="orange"><span>🟠</span><span>活力</span></div>
+        </div>
+        <button class="submit-btn" id="submitBtn" onclick="submitMood()" disabled>投球！</button>
+      </div>
+      <div id="statsTab" class="tab-content">
+        <h2>心情统计</h2>
+        <div class="stats-grid" id="statsGrid">
+          <div class="stat-item"><div class="stat-count" id="totalDays">0</div><div class="stat-label">总天数</div></div>
+          <div class="stat-item"><div class="stat-count" id="currentStreak">0</div><div class="stat-label">连续天数</div></div>
+          <div class="stat-item"><div class="stat-count" id="longestStreak">0</div><div class="stat-label">最长连续</div></div>
+          <div class="stat-item"><div class="stat-count" id="thisMonth">0</div><div class="stat-label">本月记录</div></div>
+        </div>
+      </div>
+      <div id="historyTab" class="tab-content"><h2>投球历史</h2><div class="history-list" id="historyList"><p style="text-align: center; color: #999; padding: 20px;">暂无记录</p></div></div>
+      <div id="correlationTab" class="tab-content"><h2>心情与月相关联</h2><div class="correlation-chart" id="correlationChart"><p style="text-align: center; color: #999; padding: 20px;">数据不足，继续记录吧！</p></div></div>
+    </div>
+  </div>
+<script>
+const MOON_PHASES=[{name:'新月',icon:'🌑'},{name:'蛾眉月',icon:'🌒'},{name:'上弦月',icon:'🌓'},{name:'盈凸月',icon:'🌔'},{name:'满月',icon:'🌕'},{name:'亏凸月',icon:'🌖'},{name:'下弦月',icon:'🌗'},{name:'残月',icon:'🌘'}];const MOOD_COLORS={red:{label:'兴奋',class:'red'},yellow:{label:'开心',class:'yellow'},blue:{label:'忧郁',class:'blue'},green:{label:'平和',class:'green'},purple:{label:'焦虑',class:'purple'},orange:{label:'活力',class:'orange'}};let selectedMood=null;let selectedMoodLabel=null;document.addEventListener('DOMContentLoaded',function(){initApp()});function initApp(){updateMoonPhase();checkTodaySubmission();loadStats();loadHistory();loadCorrelation()}function updateMoonPhase(){const now=new Date();const dateStr=now.toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'long'});document.getElementById('currentDate').textContent=dateStr;const moonPhase=calculateMoonPhase(now);const moonElement=document.getElementById('moonPhase');moonElement.innerHTML=`<div class="moon-icon">${moonPhase.icon}</div><div class="moon-name">${moonPhase.name}</div><div class="moon-date">${dateStr}</div>`}function calculateMoonPhase(date){const knownNewMoon=new Date('2000-01-06');const synodicMonth=29.53058867;const diffTime=date.getTime()-knownNewMoon.getTime();const diffDays=diffTime/(1000*60*60*24);const totalCycles=diffDays/synodicMonth;const currentCycle=totalCycles-Math.floor(totalCycles);const phaseIndex=Math.floor(currentCycle*8)%8;return MOON_PHASES[phaseIndex]}function getTodayString(){const now=new Date();const year=now.getFullYear();const month=String(now.getMonth()+1).padStart(2,'0');const day=String(now.getDate()).padStart(2,'0');return`${year}-${month}-${day}`}function checkTodaySubmission(){const today=getTodayString();const records=getRecords();const alreadySubmitted=records.some(record=>record.date===today);if(alreadySubmitted){showMessage('今天已经投过球啦！明天再来吧～','info');document.getElementById('submitBtn').disabled=true;document.getElementById('submitBtn').textContent='今日已投球 ✓';document.querySelectorAll('.mood-ball').forEach(ball=>{ball.style.opacity='0.5';ball.style.cursor='not-allowed'})}else{document.getElementById('submitBtn').disabled=!selectedMood}}function selectMood(mood,label){const today=getTodayString();const records=getRecords();const alreadySubmitted=records.some(record=>record.date===today);if(alreadySubmitted){return}selectedMood=mood;selectedMoodLabel=label;document.querySelectorAll('.mood-ball').forEach(ball=>{ball.classList.remove('selected')});const selectedBall=document.querySelector(`.mood-ball[data-mood="${mood}"]`);if(selectedBall){selectedBall.classList.add('selected')}document.getElementById('submitBtn').disabled=!selectedMood}function submitMood(){if(!selectedMood||!selectedMoodLabel){showMessage('请先选择一个心情哦！','error');return}const today=getTodayString();const moonPhase=calculateMoonPhase(new Date());const newRecord={date:today,mood:selectedMood,moodLabel:selectedMoodLabel,moonPhase:moonPhase.name,moonIcon:moonPhase.icon,timestamp:new Date().getTime()};const records=getRecords();records.push(newRecord);saveRecords(records);showMessage('投球成功！记录已保存～','success');document.getElementById('submitBtn').disabled=true;document.getElementById('submitBtn').textContent='今日已投球 ✓';document.querySelectorAll('.mood-ball').forEach(ball=>{ball.style.opacity='0.5';ball.style.cursor='not-allowed'});loadStats();loadHistory();loadCorrelation();selectedMood=null;selectedMoodLabel=null;document.querySelectorAll('.mood-ball').forEach(ball=>{ball.classList.remove('selected')})}function getRecords(){const records=localStorage.getItem('moodBallRecords');return records?JSON.parse(records):[]}function saveRecords(records){localStorage.setItem('moodBallRecords',JSON.stringify(records))}function loadStats(){const records=getRecords();document.getElementById('totalDays').textContent=records.length;const{current,longest}=calculateStreaks(records);document.getElementById('currentStreak').textContent=current;document.getElementById('longestStreak').textContent=longest;const now=new Date();const currentMonth=now.getMonth();const currentYear=now.getFullYear();const thisMonthCount=records.filter(record=>{const recordDate=new Date(record.date);return recordDate.getMonth()===currentMonth&&recordDate.getFullYear()===currentYear}).length;document.getElementById('thisMonth').textContent=thisMonthCount}function calculateStreaks(records){if(records.length===0){return{current:0,longest:0}}const sortedRecords=[...records].sort((a,b)=>new Date(b.date)-new Date(a.date));let currentStreak=0;const today=new Date();today.setHours(0,0,0,0);for(let i=0;i<sortedRecords.length;i++){const recordDate=new Date(sortedRecords[i].date);recordDate.setHours(0,0,0,0);const expectedDate=new Date(today);expectedDate.setDate(expectedDate.getDate()-i);if(recordDate.getTime()===expectedDate.getTime()){currentStreak++}else{break}}let longestStreak=0;let tempStreak=1;for(let i=1;i<sortedRecords.length;i++){const currentDate=new Date(sortedRecords[i].date);const prevDate=new Date(sortedRecords[i-1].date);const diffDays=(prevDate-currentDate)/(1000*60*60*24);if(diffDays===1){tempStreak++}else{longestStreak=Math.max(longestStreak,tempStreak);tempStreak=1}}longestStreak=Math.max(longestStreak,tempStreak);return{current:currentStreak,longest:longestStreak}}function loadHistory(){const records=getRecords();const historyList=document.getElementById('historyList');if(records.length===0){historyList.innerHTML='<p style="text-align: center; color: #999; padding: 20px;">暂无记录</p>';return}const sortedRecords=[...records].sort((a,b)=>new Date(b.date)-new Date(a.date));historyList.innerHTML=sortedRecords.map(record=>{const moodColor=MOOD_COLORS[record.mood];return`<div class="history-item"><div class="history-ball ${moodColor.class}" style="background: var(--${record.mood}-gradient)"></div><div class="history-info"><div class="history-date">${record.date} - ${record.moodLabel}</div><div class="history-moon">${record.moonIcon} ${record.moonPhase}</div></div></div>`}).join('')}function loadCorrelation(){const records=getRecords();const correlationChart=document.getElementById('correlationChart');if(records.length<7){correlationChart.innerHTML='<p style="text-align: center; color: #999; padding: 20px;">数据不足，继续记录吧！（至少需要 7 条记录）</p>';return}const moonMoodStats={};MOON_PHASES.forEach(phase=>{moonMoodStats[phase.name]={total:0,moods:{}};Object.keys(MOOD_COLORS).forEach(mood=>{moonMoodStats[phase.name].moods[mood]=0})});records.forEach(record=>{if(moonMoodStats[record.moonPhase]){moonMoodStats[record.moonPhase].total++;if(moonMoodStats[record.moonPhase].moods[record.mood]!==undefined){moonMoodStats[record.moonPhase].moods[record.mood]++}}});const moonDominantMoods={};Object.keys(moonMoodStats).forEach(phaseName=>{const stats=moonMoodStats[phaseName];if(stats.total>0){let maxCount=0;let dominantMood=null;Object.entries(stats.moods).forEach(([mood,count])=>{if(count>maxCount){maxCount=count;dominantMood=mood}});moonDominantMoods[phaseName]={mood:dominantMood,count:maxCount,total:stats.total,percentage:Math.round((maxCount/stats.total)*100)}}});const moonPhaseIcons={'新月':'🌑','蛾眉月':'🌒','上弦月':'🌓','盈凸月':'🌔','满月':'🌕','亏凸月':'🌖','下弦月':'🌗','残月':'🌘'};correlationChart.innerHTML=Object.entries(moonDominantMoods).filter(([_,data])=>data.total>0).map(([phaseName,data])=>{const moodInfo=MOOD_COLORS[data.mood];return`<div class="correlation-item"><div class="correlation-moon">${moonPhaseIcons[phaseName]}</div><div class="correlation-bar"><div class="correlation-fill" style="width: ${data.percentage}%">${data.percentage}%</div></div><div style="min-width: 80px; font-size: 0.9rem;"><span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--${data.mood}-bg); margin-right: 5px;"></span>${moodInfo.label}</div></div>`}).join('')}function switchTab(tabName){document.querySelectorAll('.tab-btn').forEach(btn=>{btn.classList.remove('active')});event.target.classList.add('active');document.querySelectorAll('.tab-content').forEach(content=>{content.classList.remove('active')});document.getElementById(`${tabName}Tab`).classList.add('active');if(tabName==='stats'){loadStats()}else if(tabName==='history'){loadHistory()}else if(tabName==='correlation'){loadCorrelation()}}function showMessage(text,type){const container=document.getElementById('messageContainer');container.innerHTML=`<div class="message ${type}">${text}</div>`;setTimeout(()=>{container.innerHTML=''},3000)}
+</script>
+</body>
+</html>
